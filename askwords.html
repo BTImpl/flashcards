@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>FlashCard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="./wordService.js"></script>
+</head>
+<script>
+        const cardCount = 4;
+        var wordIdx = 0;
+        var allWord;
+        var sheetName, sheetRange, actualWords;
+        var queryParams = loadQueryParameters();
+        async function init() {
+            
+            queryParams.forEach(param => {
+                if(param.key === 'sheet'){
+                    sheetName = param.value;
+                } else if(param.key === 'type'){
+                    actualWords = param.value;
+                    if(param.value === 'known'){
+                        sheetRange = 'A1:B998';
+                    } else {
+                        sheetRange = 'C1:D998';
+                    }
+                }
+            });
+            allWord = await getWords(sheetName, sheetRange);
+            shuffle(allWord);
+           
+            document.getElementById('en').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    check();
+                }
+            });
+
+            start();
+        }
+
+        function getPossibleEnglish() {
+            let randomIndex = Math.floor(Math.random() * allWord.length);
+            return allWord[randomIndex].en;
+        }
+
+        async function start() {
+            document.getElementById('actualWord').innerText = `${wordIdx + 1} / ${allWord.length}`;
+            document.getElementById('actualHu').innerText = allWord[wordIdx].hu; 
+            document.getElementById('en').value = '';
+            document.getElementById('en').classList.remove('bg-danger');
+            document.getElementById('en').focus();
+        }
+
+        function check(){
+            const enInput = document.getElementById('en').value;
+            if(enInput !== undefined && allWord[wordIdx].en.toLowerCase() === enInput.toLowerCase()){
+                
+                wordIdx++;
+                if(wordIdx >= allWord.length){
+                    wordIdx = 0;
+                }
+                start();
+            } else {
+                document.getElementById('en').value = '';
+                document.getElementById('en').classList.add('bg-danger');
+                document.getElementById('en').focus();
+            }
+        }
+
+        function step(direction){
+            if(wordIdx + direction >= 0 && wordIdx + direction < allWord.length){
+                wordIdx = wordIdx + direction;
+            }
+            start();
+        }
+       
+
+        function goHome(){
+            window.location.href = 'index.html?sheet=' + sheetName + '&type=' + actualWords;
+        }
+
+        function help(){
+            const helpText = document.getElementById('helpText');
+            
+            helpText.innerText = allWord[wordIdx].en;
+            setTimeout(() => {
+                helpText.innerText = '';
+            }, 2500);
+        }
+</script>
+<body>
+    
+    <div id="cards" class="container-fluid min-vh-100 d-flex flex-column p-2">
+        <div class="card bg-primary text-white text-center" onclick="goHome()">
+            <h1><i class="fa fa-home" aria-hidden="true"></i>Home</h1>
+        </div>
+        <div class="mt-2 card bg-success text-white text-center">
+            <h1 id="actualHu">&nbsp;</h1>
+        </div>
+       
+       
+            <div id="cardrow" class="input-group mb-3 mt-3">
+            <input type="text" id="en" class="form-control">
+            <div class="input-group-append">
+
+                <button class="btn btn-info" onclick="help()">
+                    <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+                </button>
+            </div>
+            </div>
+        <div class="row ps-2">
+            <h1 id="helpText">&nbsp;</h1>
+        </div>
+        <div class="row p-3">
+            <button id="checkButton" class="col-12 btn btn-dark" onclick="check()">
+                <i class="fa fa-check-square-o" aria-hidden="true"></i>
+                <span>Check</span>
+            </button>
+        </div>
+        <div class="row ps-2">
+            <div class="col-4 ">
+                <button class="col-12 btn btn-dark" onclick="step(-1)">
+                    <i class="fa fa-arrow-left"></i>
+                    <span>Prev</span>
+                </button>
+            </div>
+            <div class="col-4 text-center">
+                <h3 class="col-12" style="display: inline;" id="actualWord">&nbsp;</h3>
+            </div>
+            <div class="col-4">
+                <button class="col-12 btn btn-dark" onclick="step(1)">
+                    <span>Next</span>
+                    <i class="fa fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    init();
+</script>
+
+</html>
