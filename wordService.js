@@ -1,3 +1,4 @@
+var apiKey = ''; //TODO NE RAKD FEL!
 var sheetId = '11UCGxa7EAQf_xTrIB2dLQ2zBqiCKZ7SOIylishPYbgs';
 
             
@@ -59,3 +60,19 @@ function loadQueryParameters() {
     }
     return queryParams;
 }
+
+const speakPhrase = (text) => {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const ukVoice = voices.find(v => v.lang === 'en-GB' || v.lang.includes('GB'));
+  
+  if (ukVoice) {
+    utterance.voice = ukVoice;
+  }
+
+  utterance.lang = 'en-GB';
+  utterance.rate = 0.9;
+  
+  window.speechSynthesis.speak(utterance);
+};

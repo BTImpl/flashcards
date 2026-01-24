@@ -49,6 +49,7 @@
                 document.getElementById('word').innerText = wordList[this.actualWordIndex].en;
             }
             this.enDisplayed = !this.enDisplayed;
+            document.getElementById('speakButton').disabled = !this.enDisplayed;
         }
 
         function shuffle(a) {
@@ -68,6 +69,7 @@
             document.getElementById('word').innerText = wordList[this.actualWordIndex].hu;
             document.getElementById('actualWord').innerText = (this.actualWordIndex + 1) + '/' + (wordList.length);
             this.enDisplayed = false;
+            document.getElementById('speakButton').disabled = !this.enDisplayed;
         }
 
         async function loadDeck(){
@@ -90,12 +92,21 @@
         function goHome(){
             window.location.href = 'index.html?sheet=' + sheetName + '&type=' + actualWords;
         }
+
+        function speak(){
+            if(enDisplayed){
+                speakPhrase(wordList[actualWordIndex].en);
+            }
+        }
     </script>
 
     <body>    
         <div id="cards" class="container-fluid min-vh-100 d-flex flex-column p-2">
             <div class="card bg-primary text-white text-center" onclick="goHome()">
                 <h1><i class="fa fa-home" aria-hidden="true"></i>Home</h1>
+            </div>
+            <div class="card bg-info text-white text-center" onclick="speak()">
+                <h1><i class="fa fa-volume-up" aria-hidden="true"></i></h1>
             </div>
             <div class="row flex-grow-1 p-3" onclick="flip()">
                 <div id="wordCard" class="text-center p-4 card bg-dark text-white ">
