@@ -10,6 +10,9 @@ import { Router } from '@angular/router';
 export class HeaderComponent {
   private router = inject(Router);
 
+  user = 'Gabi';
+  listName = 'Known';
+
   toHome(){
     this.router.navigate(['/']);
   }
