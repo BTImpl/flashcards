@@ -50,4 +50,7 @@ export class AskWordsComponent implements OnInit {
     this.actualWord = this.words[this.actualIdx];
   }
 
+  getStatusBar(){
+    return `${this.actualIdx + 1} / ${this.words.length}`;
+  }
 }

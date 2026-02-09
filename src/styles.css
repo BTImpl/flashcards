@@ -4,4 +4,14 @@ html, body {
 
 /* Az Angular gyökér eleme is legyen 100% magas és Flex */
 
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
 

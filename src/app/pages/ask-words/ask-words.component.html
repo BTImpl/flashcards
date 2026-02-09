@@ -27,19 +27,21 @@
     </button>
   </div>
 
-  <footer class="row">
+  <footer>
+    <div class="row">
     <div class="col-4">
       <button class="col-12 btn btn-dark" (click)="step(-1)">
         <span>Prev</span>
       </button>
     </div>
     <div class="col-4 text-center">
-      <h3 class="col-12">{{ actualIdx + 1 }} / {{ words.length }}</h3>
+      <h3 class="col-12">{{getStatusBar()}}</h3>
     </div>
     <div class="col-4">
       <button class="col-12 btn btn-dark" (click)="step(1)">
         <span>Next</span>
       </button>
+    </div>
     </div>
   </footer>
 </div>
