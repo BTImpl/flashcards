@@ -14,3 +14,14 @@
   height: 100%;
   width: 100%;
 }
+
+.answers {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .2rem;
+}
+
+app-word-card {
+  height: 100%;
+}
