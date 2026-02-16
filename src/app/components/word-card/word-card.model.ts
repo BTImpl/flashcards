@@ -1,6 +1,13 @@
 export interface WordCardModel {
-  value: string;
-  visible: boolean;
-  activeClass: string;
-  speakable: boolean;
+  value?: string;
+  visible?: boolean;
+  activeClass?: string;
+  speakable?: boolean;
 }
+
+export const createSimpleWord = (val: string, spek: boolean):WordCardModel => ({
+  value: val,
+  visible: true,
+  activeClass: 'bg-dark',
+  speakable: spek
+});

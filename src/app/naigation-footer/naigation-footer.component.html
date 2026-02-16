@@ -1,0 +1,27 @@
+<footer class="p-1">
+  <div class="row">
+    <div class="col-4">
+      <button
+        class="col-12 btn btn-dark"
+        (click)="back()"
+        [class.disabled]="backDisabled"
+      >
+        <i class="fa fa-arrow-left"></i>
+        <span>{{ "button.prev" | translate }}</span>
+      </button>
+    </div>
+    <div class="col-4 text-center">
+      <ng-content></ng-content>
+    </div>
+    <div class="col-4">
+      <button
+        class="col-12 btn btn-dark"
+        (click)="next()"
+        [class.disabled]="nextDisabled"
+      >
+        <span>{{ "button.next" | translate }}</span>
+        <i class="fa fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</footer>

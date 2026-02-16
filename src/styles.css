@@ -16,3 +16,12 @@ main {
   display: flex;
   flex-direction: column;
 }
+
+/* Ez az a div, amit a HTML-edben írtál */
+.container-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* A kártya felül, a footer alul marad */
+  height: 100%;
+  width: 100%;
+}

@@ -2,32 +2,15 @@
 
 
     <div class="row " style="height: 100%;" *ngFor="let w of actualWords; let i = index">
-      <app-word-card class="col-6" style="padding-left: 1rem; padding-right: 0; padding-bottom: .5rem;" (cardClicked)="wordClicked('en', i)" [word]="w.en">
+      <app-word-card class="col-6 pairing-word-left" (cardClicked)="wordClicked('en', i)" [word]="w.en">
       </app-word-card>
-      <app-word-card class="col-6" style="padding-right: 1rem; padding-left: 0; padding-bottom: .5rem;" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
+      <app-word-card class="col-6 pairing-word-right" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
       </app-word-card>
     </div>
 
 
-  <footer class="p-1">
-      <div class="row">
-        <div class="col-4 ">
-          <button class="col-12 btn btn-dark"
-            [disabled]="actualStartIndex === 0"
-            (click)="prev()">
-            <i class="fa fa-arrow-left"></i>
-            <span>Prev</span>
-          </button>
-        </div>
-        <div class="col-4 text-center">
-          <h3 class="col-12" style="display: inline;" id="actualWord">{{actualStartIndex +1}}-{{actualStartIndex+displayedWordsCount}}/{{lenth}}</h3>
-        </div>
-        <div class="col-4">
-          <button class="col-12 btn btn-dark" [disabled]="actualStartIndex + displayedWordsCount  === lenth" (click)="next()">
-            <span>Next</span>
-            <i class="fa fa-arrow-right"></i>
-          </button>
-        </div>
-      </div>
-  </footer>
+    <app-naigation-footer (backClicked)="prev()" (nextClicked)="next()" [backDisabled]="actualStartIndex <= 0" [nextDisabled]="actualStartIndex + displayedWordsCount >= lenth">
+      <h3 class="col-12" style="display: inline;" id="actualWord">{{actualStartIndex +1}}-{{actualStartIndex+displayedWordsCount}}/{{lenth}}</h3>
+    </app-naigation-footer>
+
 </div>

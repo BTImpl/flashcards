@@ -2,24 +2,7 @@
 
   <app-word-card [word]="actual" (cardClicked)="flip()"></app-word-card>
 
-  <footer class="p-1">
-  <div class="row">
-    <div class="col-4 ">
-      <button class="col-12 btn btn-dark" (click)="previous()">
-        <i class="fa fa-arrow-left"></i>
-        <span>Prev</span>
-      </button>
-    </div>
-    <div class="col-4 text-center">
+    <app-naigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualWordIdx <= 0" [nextDisabled]="actualWordIdx + 1 >= words.length">
       <h1 class="col-12" id="actualWord"> {{ actualWordIdx + 1}} / {{words.length}}</h1>
-    </div>
-    <div class="col-4">
-      <button class="col-12 btn btn-dark" (click)="next()">
-        <span>Next</span>
-        <i class="fa fa-arrow-right"></i>
-      </button>
-    </div>
-
-  </div>
-</footer>
+    </app-naigation-footer>
 </div>

@@ -3,12 +3,14 @@ import { timer } from 'rxjs';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+import { NaigationFooterComponent } from "src/app/naigation-footer/naigation-footer.component";
 
 @Component({
     selector: 'app-ask-words',
     templateUrl: './ask-words.component.html',
     styleUrls: ['./ask-words.component.css'],
-    imports: [FormsModule]
+    imports: [FormsModule, TranslatePipe, NaigationFooterComponent]
 })
 export class AskWordsComponent implements OnInit {
   private wordService = inject(WordService);

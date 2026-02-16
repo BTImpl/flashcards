@@ -26,26 +26,14 @@
     <div class="row">
       <button class="col-12 btn btn-dark p-3" (click)="check()">
         <i class="fa fa-square-check" aria-hidden="true"></i>
-        <span>Check</span>
+        <span>{{'button.check' | translate}}</span>
       </button>
     </div>
   </div>
 
-  <footer class="p-1">
-    <div class="row">
-      <div class="col-4">
-        <button class="col-12 btn btn-dark" (click)="step(-1)">
-          <span>Prev</span>
-        </button>
-      </div>
-      <div class="col-4 text-center">
-        <h3 class="col-12">{{ getStatusBar() }}</h3>
-      </div>
-      <div class="col-4">
-        <button class="col-12 btn btn-dark" (click)="step(1)">
-          <span>Next</span>
-        </button>
-      </div>
-    </div>
-  </footer>
+  <app-naigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualIdx <= 0"
+    [nextDisabled]="actualIdx +1 >= words.length">
+    <h3 class="col-12">{{ getStatusBar() }}</h3>
+  </app-naigation-footer>
+
 </div>

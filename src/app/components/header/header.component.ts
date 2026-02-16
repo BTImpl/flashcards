@@ -22,18 +22,10 @@ export class HeaderComponent {
   }
 
   changeList(){
-    if(this.model.list === KnownUnknownEnum.KNOWN){
-      this.model.list = KnownUnknownEnum.UNKNOWN;
-    } else {
-      this.model.list = KnownUnknownEnum.KNOWN;
-    }
+    this.model.list = this.model.list === KnownUnknownEnum.KNOWN ? KnownUnknownEnum.UNKNOWN : KnownUnknownEnum.KNOWN;
   }
 
   chanegeUser(){
-    if(this.model.user === UsersEnum.GABI){
-      this.model.user = UsersEnum.TOMI;
-    } else {
-      this.model.user = UsersEnum.GABI;
-    }
+    this.model.user = this.model.user === UsersEnum.GABI ? UsersEnum.TOMI : UsersEnum.TOMI;
   }
 }

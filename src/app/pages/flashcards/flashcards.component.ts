@@ -1,60 +1,48 @@
 import { Component, OnInit } from '@angular/core';
-import { WordCardModel } from 'src/app/components/word-card/word-card.model';
+import { WordCardModel,createSimpleWord } from 'src/app/components/word-card/word-card.model';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
+import { CommonModule } from '@angular/common';
+import { NaigationFooterComponent } from "src/app/naigation-footer/naigation-footer.component";
 
 @Component({
-    selector: 'app-flashcards',
-    templateUrl: './flashcards.component.html',
-    styleUrls: ['./flashcards.component.css'],
-    imports: [WordCardComponent],
+  selector: 'app-flashcards',
+  templateUrl: './flashcards.component.html',
+  styleUrls: ['./flashcards.component.css'],
+  imports: [CommonModule, WordCardComponent, NaigationFooterComponent],
+  standalone: true,
 })
 export class FlashcardsComponent implements OnInit {
   words = this.wordService.getWords();
   actualWordIdx: number = 0;
   actualWord: Word = { hu: '', en: '' };
 
-  actual: WordCardModel = { value: '', visible: true, activeClass: 'bg-dark', speakable: false };
-  enWord: WordCardModel = { value: '', visible: true, activeClass: 'bg-dark', speakable: false };
-  huWord: WordCardModel = { value: '', visible: true, activeClass: 'bg-dark', speakable: false };
+  actual?: WordCardModel;
+  enWord?: WordCardModel;
+  huWord?: WordCardModel;
 
   constructor(private wordService: WordService) {}
 
   ngOnInit(): void {
     this.wordService.shuffle(this.words);
+    this.step(0);
+  }
+
+  step(direction: number) {
+    const newIdx = this.actualWordIdx + direction;
+    this.actualWordIdx = newIdx < this.words.length && newIdx >= 0 ? newIdx : this.actualWordIdx;
     this.actualWord = this.words[this.actualWordIdx];
     this.setActualWordCard(this.actualWord);
   }
 
-  next() {
-    if (this.actualWordIdx + 1 < this.words.length) {
-      this.actualWordIdx++;
-      this.actualWord = this.words[this.actualWordIdx];
-      this.setActualWordCard(this.actualWord);
-    }
+  flip() {
+    this.actual = this.actual === this.enWord ? this.huWord : this.enWord;
   }
 
-  previous() {
-    if (this.actualWordIdx > 0) {
-      this.actualWordIdx--;
-      this.actualWord = this.words[this.actualWordIdx];
-      this.setActualWordCard(this.actualWord);
-    }
-  }
-
-  flip(){
-    if(this.actual === this.enWord){
-      this.actual = this.huWord;
-    } else {
-      this.actual = this.enWord;
-    }
-  }
-
-  private setActualWordCard(word: Word){
-    this.enWord = { value: word.en, visible: true, activeClass: 'bg-dark', speakable: true };
-    this.huWord = { value: word.hu, visible: true, activeClass: 'bg-dark', speakable: false };
+  private setActualWordCard(word: Word) {
+    this.enWord = createSimpleWord(word.en, true);
+    this.huWord = createSimpleWord(word.hu, false);
     this.actual = this.enWord;
   }
-
 }

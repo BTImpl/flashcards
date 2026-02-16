@@ -28,7 +28,9 @@ export class WordService {
     }
   }
 
-  speakPhrase(text: string) {
+  speakPhrase(text?: string) {
+    if(!text) return;
+
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();

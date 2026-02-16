@@ -1,7 +1,10 @@
 {
   "button": {
     "home": "Home",
-    "restart": "Restart"
+    "restart": "Restart",
+    "next": "Next",
+    "prev": "Previous",
+    "check": "Check"
   },
   "home": {
     "flashcards": "Flashcards",

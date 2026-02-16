@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
     imports: [NgClass]
 })
 export class WordCardComponent {
-  @Input() word: WordCardModel = { value: '', visible: true, activeClass: 'bg-dark', speakable: false };
+  @Input() word?: WordCardModel;
   @Output() cardClicked = new EventEmitter<void>();
 
    private wordService = inject(WordService);
@@ -20,7 +20,7 @@ export class WordCardComponent {
   }
 
   speak(event: Event){
-    this.wordService.speakPhrase(this.word.value);
+    this.wordService.speakPhrase(this.word?.value);
     event.stopPropagation();
   }
 }
