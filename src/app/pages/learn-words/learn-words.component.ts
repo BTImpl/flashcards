@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WordService } from 'src/app/services/words.service';
@@ -11,25 +11,16 @@ import { WordStore } from 'src/app/services/word.store';
   templateUrl: './learn-words.component.html',
   styleUrls: ['./learn-words.component.css'],
   standalone: true,
-  imports: [CommonModule, WordCardComponent, TranslatePipe]
+  imports: [CommonModule, WordCardComponent, TranslatePipe],
 })
 export class LearnWordsComponent {
   private wordStore = inject(WordStore);
   private wordService = inject(WordService);
 
   readonly questionLang = signal<LangKey>('en');
-  readonly answerLang = computed<LangKey>(() => this.questionLang() === 'en' ? 'hu' : 'en');
+  readonly answerLang = computed<LangKey>(() => (this.questionLang() === 'en' ? 'hu' : 'en'));
 
-
-  readonly cards = linkedSignal<LearnWordData[], LearnWordData[]>({
-    source: this.wordStore.words,
-    computation: (sourceWords, previous) => {
-      const mapped = sourceWords.map(w => ({ hu: w.hu, en: w.en }));
-      this.wordService.shuffle(mapped);
-      return mapped;
-    }
-  });
-
+  readonly cards = signal<LearnWordData[]>([]);
   readonly actualIdx = signal(0);
   readonly success = signal(0);
   readonly failed = signal(0);
@@ -39,23 +30,19 @@ export class LearnWordsComponent {
   readonly currentWord = computed(() => this.cards()[this.actualIdx()]);
   readonly isGameOver = computed(() => this.actualIdx() >= this.cards().length && this.cards().length > 0);
 
-  readonly currentOptions = computed(() => {
-    const target = this.currentWord();
-    const allCards = this.cards();
+  readonly currentOptions = signal<LearnWordData[]>([]);
 
-    if (!target || allCards.length === 0) return [];
+  constructor() {
+    effect(() => {
+      const sourceWords = this.wordStore.words();
+      const mapped = sourceWords.map((w) => ({ hu: w.hu, en: w.en }));
+      this.wordService.shuffle(mapped);
+      this.cards.set(mapped);
+      this.restart();
+    });
+  }
 
-    const others = allCards.filter(c => c !== target);
-    this.wordService.shuffle(others);
-
-    const options = [...others.slice(0, 3), target];
-    this.wordService.shuffle(options);
-
-    return options;
-  });
-
-
- handleWordClick(optionIdx: number, selectedWord: LearnWordData) {
+  handleWordClick(optionIdx: number, selectedWord: LearnWordData) {
     if (this.feedbackState()?.isCorrect) return;
 
     const target = this.currentWord();
@@ -67,20 +54,20 @@ export class LearnWordsComponent {
 
     if (isMatch) {
       if (!this.wasFailed()) {
-        this.success.update(s => s + 1);
+        this.success.update((s) => s + 1);
       }
-   setTimeout(() => {
+      setTimeout(() => {
         this.nextWord();
       }, 500);
     } else {
       if (!this.wasFailed()) {
-        this.failed.update(f => f + 1);
+        this.failed.update((f) => f + 1);
         this.wasFailed.set(true);
       }
 
       setTimeout(() => {
         if (this.feedbackState()?.clickedIndex === optionIdx && !this.feedbackState()?.isCorrect) {
-           this.feedbackState.set(null);
+          this.feedbackState.set(null);
         }
       }, 1000);
     }
@@ -89,11 +76,30 @@ export class LearnWordsComponent {
   private nextWord() {
     this.feedbackState.set(null);
     this.wasFailed.set(false);
-    this.actualIdx.update(i => i + 1);
+    this.actualIdx.update((i) => i + 1);
+    this.generateOptions();
+  }
+
+  private generateOptions() {
+    const target = this.currentWord();
+    const allCards = this.cards();
+
+    if (!target || allCards.length === 0) {
+      this.currentOptions.set([]);
+      return;
+    };
+
+    const others = allCards.filter((c) => c !== target);
+    this.wordService.shuffle(others);
+
+    const options = [...others.slice(0, 3), target];
+    this.wordService.shuffle(options);
+
+    this.currentOptions.set(options);
   }
 
   restart() {
-    this.cards.update(current => {
+    this.cards.update((current) => {
       const reshuffled = [...current];
       this.wordService.shuffle(reshuffled);
       return reshuffled;
@@ -104,10 +110,11 @@ export class LearnWordsComponent {
     this.failed.set(0);
     this.wasFailed.set(false);
     this.feedbackState.set(null);
+    this.generateOptions();
   }
 
   toggleLang() {
-    this.questionLang.update(l => l === 'en' ? 'hu' : 'en');
+    this.questionLang.update((l) => (l === 'en' ? 'hu' : 'en'));
     this.restart();
   }
 
@@ -130,7 +137,7 @@ export class LearnWordsComponent {
       value: optionWord[this.answerLang()],
       visible: true,
       speakable: false,
-      activeClass: activeClass
+      activeClass: activeClass,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WordStore } from 'src/app/services/word.store';
 import { WordService } from 'src/app/services/words.service';
@@ -31,14 +31,7 @@ export class PairingComponent {
     return this.allWords().slice(start, start + this.displayedWordsCount);
   });
 
-  readonly shuffledHuWords = linkedSignal<Word[], Word[]>({
-    source: this.currentPageWords,
-    computation: (words) => {
-      const shuffled = [...words];
-      this.wordService.shuffle(shuffled);
-      return shuffled;
-    }
-  });
+  readonly shuffledHuWords = signal<Word[]>([]);
 
   readonly enCards = computed<WordCardModel[]>(() =>
     this.currentPageWords().map((w, idx) => ({
@@ -57,6 +50,14 @@ export class PairingComponent {
       speakable: false
     }))
   );
+
+  constructor() {
+    effect(() => {
+      const wordsToShuffle = [...this.currentPageWords()];
+      this.wordService.shuffle(wordsToShuffle);
+      this.shuffledHuWords.set(wordsToShuffle);
+    });
+  }
 
   wordClicked(lang: 'en' | 'hu', idx: number) {
     if (lang === 'en') {

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  effect,
-  OnInit,
-  signal,
-  untracked,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   WordCardModel,
   createSimpleWord,
@@ -26,58 +19,55 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
 })
 export class FlashcardsComponent {
-  words: Word[] = [];
+  private wordService = inject(WordService);
+  private wordStore = inject(WordStore);
+
+  private allWords = this.wordStore.words;
+
+  shuffledWords = signal<Word[]>([]);
   actualWordIdx = signal(0);
 
-  actual = signal<WordCardModel | undefined>(undefined);
+  actualWord = computed(() => this.shuffledWords()[this.actualWordIdx()]);
 
-  enWord?: WordCardModel;
-  huWord?: WordCardModel;
+  enWord = computed(() => {
+    const word = this.actualWord();
+    return word ? createSimpleWord(word.en, true) : undefined;
+  });
 
-  constructor(
-    private wordService: WordService,
-    private wordStore: WordStore
-  ) {
-    effect(
-      () => {
-      const currentWords = this.wordStore.words();
+  huWord = computed(() => {
+    const word = this.actualWord();
+    return word ? createSimpleWord(word.hu, false) : undefined;
+  });
 
-      if (currentWords.length > 0) {
-        this.reset(currentWords);
-      }
-      }, {allowSignalWrites: true});
-    }
+  isFlipped = signal(false);
+  actual = computed(() => (this.isFlipped() ? this.huWord() : this.enWord()));
 
+  constructor() {
+    effect(() => {
+      const wordsToShuffle = [...this.allWords()];
+      this.wordService.shuffle(wordsToShuffle);
+      this.shuffledWords.set(wordsToShuffle);
+      this.reset();
+    });
+  }
 
-  reset(newWords: Word[]) {
-    this.words = [...newWords];
-    this.wordService.shuffle(this.words);
+  reset() {
     this.actualWordIdx.set(0);
-
-    this.updateCard(0)
+    this.isFlipped.set(false);
   }
 
   step(direction: number) {
-    const currentIdx = this.actualWordIdx();
-    const newIdx = currentIdx + direction;
-
-    if(newIdx >= 0 && newIdx < this.words.length){
-      this.actualWordIdx.set(newIdx);
-      this.updateCard(newIdx);
-    }
-  }
-
-  private updateCard(idx: number){
-    const word = this.words[idx];
-    this.enWord = createSimpleWord(word.en, true);
-    this.huWord = createSimpleWord(word.hu, false);
-
-    this.actual.set(this.enWord);
+    this.actualWordIdx.update((currentIdx) => {
+      const newIdx = currentIdx + direction;
+      if (newIdx >= 0 && newIdx < this.shuffledWords().length) {
+        this.isFlipped.set(false);
+        return newIdx;
+      }
+      return currentIdx;
+    });
   }
 
   flip() {
-    const current = this.actual();
-    this.actual.set(current === this.enWord ? this.huWord : this.enWord);
+    this.isFlipped.update((flipped) => !flipped);
   }
-
 }
