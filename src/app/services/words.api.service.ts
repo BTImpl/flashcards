@@ -16,7 +16,6 @@ export class WordsApiService {
     const requestUri = `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${sheet}!${range}?key=${this.apiKey}`;
     return this.http.get<SheetsResponse>(requestUri).pipe(
       map((response) => {
-        console.log(JSON.stringify(response.values));
         return response.values.map(
           (row) =>
             ({

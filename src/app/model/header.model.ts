@@ -1,7 +1,3 @@
-export interface HeaderModel {
-    user: UsersEnum;
-    list: ListType;
-}
 
 export interface ListType {
     id: ListTypeEnum;
