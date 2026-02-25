@@ -13,9 +13,7 @@ export class WordsApiService {
 
 
   getWords(sheet: string, range: string): Observable<Word[]>{
-    console.log(`sheet: ${sheet}, range: ${range}`);
     const requestUri = `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${sheet}!${range}?key=${this.apiKey}`;
-    console.log('Get data from: ' + requestUri);
     return this.http.get<SheetsResponse>(requestUri).pipe(
       map((response) => {
         console.log(JSON.stringify(response.values));
@@ -29,18 +27,4 @@ export class WordsApiService {
       }),
     );
   }
-
-  /*getWords(): Observable<Word[]> {
-    return this.http.get<SheetsResponse>(this.requestUri).pipe(
-      map((response) => {
-        return response.values.slice(1).map(
-          (row) =>
-            ({
-              en: row[0],
-              hu: row[1],
-            }) as Word,
-        );
-      }),
-    );
-  }*/
 }
