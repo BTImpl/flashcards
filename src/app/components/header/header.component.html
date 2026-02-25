@@ -1,14 +1,14 @@
 <div class="ps-1 pe-1">
   <div class="row pt-1">
     <div class="col-6">
-      <button class="col-12 btn btn-secondary" (click)="chanegeUser()">
-        <i class="fa fa-user"></i>
+      <button class="col-12 btn btn-secondary" (click)="changeUser()">
+        <span class="fa fa-user"></span>
         <span id="sheet">{{model.user}}</span>
       </button>
     </div>
     <div class="col-6">
-      <button class="col-12 btn btn-success" id="deckButton" (click)="changeList()" >
-        <i id="deckButtonIcon" class="fa fa-exclamation" aria-hidden="true"></i>
+      <button class="col-12 btn btn-success" (click)="changeList()" >
+        <span id="deckButtonIcon" class="fa fa-exclamation" aria-hidden="true"></span>
         <span id="deckButtonText">{{model.list}}</span>
       </button>
     </div>

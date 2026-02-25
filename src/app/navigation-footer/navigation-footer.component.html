@@ -4,9 +4,9 @@
       <button
         class="col-12 btn btn-dark"
         (click)="back()"
-        [class.disabled]="backDisabled"
+        [disabled]="backDisabled"
       >
-        <i class="fa fa-arrow-left"></i>
+        <span class="fa fa-arrow-left" aria-hidden="true"></span>
         <span>{{ "button.prev" | translate }}</span>
       </button>
     </div>
@@ -17,10 +17,10 @@
       <button
         class="col-12 btn btn-dark"
         (click)="next()"
-        [class.disabled]="nextDisabled"
+        [disabled]="nextDisabled"
       >
         <span>{{ "button.next" | translate }}</span>
-        <i class="fa fa-arrow-right"></i>
+        <span class="fa fa-arrow-right" aria-hidden="true"></span>
       </button>
     </div>
   </div>

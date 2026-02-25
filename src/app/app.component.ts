@@ -4,6 +4,8 @@ import { WordService } from './services/words.service';
 import { Word, Words } from './model/words.model';
 import { HeaderComponent } from './components/header/header.component';
 import { RouterOutlet } from '@angular/router';
+import { WordsApiService } from './services/words.api.service';
+import { WordStore } from './services/word.store';
 
 @Component({
     selector: 'app-root',
@@ -13,11 +15,10 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'Flashcards';
+  ws = inject(WordStore);
 
   constructor(private translate: TranslateService) {
-    // Beállítod az alapértelmezett nyelvet
     translate.setDefaultLang('en');
-    // Aktuálisan használt nyelv
     translate.use('en');
   }
 }

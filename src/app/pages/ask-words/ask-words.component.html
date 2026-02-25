@@ -21,7 +21,7 @@
     </div>
 
     <div class="row">
-      <h1 [class.invisible]="!helpDispleyed">{{ actualWord.en }}</h1>
+      <h1 [class.invisible]="!helpDisplayed">{{ actualWord.en }}</h1>
     </div>
     <div class="row">
       <button class="col-12 btn btn-dark p-3" (click)="check()">
@@ -31,9 +31,9 @@
     </div>
   </div>
 
-  <app-naigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualIdx <= 0"
+  <app-navigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualIdx <= 0"
     [nextDisabled]="actualIdx +1 >= words.length">
     <h3 class="col-12">{{ getStatusBar() }}</h3>
-  </app-naigation-footer>
+  </app-navigation-footer>
 
 </div>

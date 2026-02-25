@@ -11,8 +11,8 @@ const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
   { path: 'flashcards', component: FlashcardsComponent },
   { path: 'pairing', component: PairingComponent },
-  { path: 'learnwords', component: LearnWordsComponent },
-  { path: 'askwords', component: AskWordsComponent },
+  { path: 'learn-words', component: LearnWordsComponent },
+  { path: 'ask-words', component: AskWordsComponent },
 ];
 
 @NgModule({

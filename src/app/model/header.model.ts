@@ -4,8 +4,8 @@ export interface HeaderModel {
 }
 
 export enum KnownUnknownEnum {
-    KNOWN = 'known',
-    UNKNOWN = 'unknown'
+    KNOWN = 'A2:B999',
+    UNKNOWN = 'C2:D999'
 }
 
 export enum UsersEnum {

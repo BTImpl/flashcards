@@ -1,15 +1,15 @@
 <div
   class="card text-center text-white"
-  [class.invisible]="!word?.visible"
-  [ngClass]="word?.activeClass"
+  [class.invisible]="!word.visible"
+  [ngClass]="word.activeClass"
   (click)="wordClicked()"
 >
   <button
     class="bg-info text-white"
     (click)="speak($event)"
-    [class.invisible]="!word?.speakable"
+    [class.invisible]="!word.speakable"
   >
-    <i class="fa fa-volume-up" aria-hidden="true"></i>
+    <span class="fa fa-volume-up" aria-hidden="true"></span>
   </button>
-  <h1>{{ word?.value }}</h1>
+  <h1>{{ word.value }}</h1>
 </div>

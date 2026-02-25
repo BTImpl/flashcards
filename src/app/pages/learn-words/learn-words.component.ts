@@ -1,108 +1,136 @@
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { timer } from 'rxjs';
 import { WordService } from 'src/app/services/words.service';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
-import { LearnWordModel } from './learn-word.model';
+import { LearnWordData, LangKey } from './learn-word.model';
+import { WordStore } from 'src/app/services/word.store';
 
 @Component({
-    selector: 'app-learn-words',
-    templateUrl: './learn-words.component.html',
-    styleUrls: ['./learn-words.component.css'],
-    standalone: true,
-    imports: [CommonModule, FormsModule, WordCardComponent, TranslatePipe]
+  selector: 'app-learn-words',
+  templateUrl: './learn-words.component.html',
+  styleUrls: ['./learn-words.component.css'],
+  standalone: true,
+  imports: [CommonModule, WordCardComponent, TranslatePipe]
 })
-export class LearnWordsComponent implements OnInit {
+export class LearnWordsComponent {
+  private wordStore = inject(WordStore);
   private wordService = inject(WordService);
-  private cdr = inject(ChangeDetectorRef);
-  cards: LearnWordModel[] = [];
-  actualIdx = 0;
-  actualWord: LearnWordModel = { hu: { value: '', visible: true, activeClass: 'bg-dark', speakable: false }, en: { value: '', visible: true, activeClass: 'bg-dark', speakable: false } };
-  possibleWords: LearnWordModel[] = [];
-  success: number = 0;
-  failed: number = 0;
-  wasFailed: boolean = false;
-  questionLang: keyof LearnWordModel = 'en';
-  answerLang: keyof LearnWordModel = 'hu';
 
-  ngOnInit(): void {
-    const words = this.wordService.getWords();
-    this.cards = words.map(word => ({ hu: { value: word.hu, visible: true, activeClass: 'bg-dark', speakable: false }, en: { value: word.en, visible: true, activeClass: 'bg-dark', speakable: false } }));
-    this.wordService.shuffle(this.cards);
+  readonly questionLang = signal<LangKey>('en');
+  readonly answerLang = computed<LangKey>(() => this.questionLang() === 'en' ? 'hu' : 'en');
 
-    this.actualIdx = 0;
-    this.next(this.actualIdx);
-  }
 
-  getRandomWordsExcept(words: LearnWordModel[]): LearnWordModel[] {
-    const filtered = words.filter((_, index) => index !== this.actualIdx);
-    const shuffled = [...filtered];
-    this.wordService.shuffle(shuffled);
-    return shuffled.slice(0, 3);
-  }
+  readonly cards = linkedSignal<LearnWordData[], LearnWordData[]>({
+    source: this.wordStore.words,
+    computation: (sourceWords, previous) => {
+      const mapped = sourceWords.map(w => ({ hu: w.hu, en: w.en }));
+      this.wordService.shuffle(mapped);
+      return mapped;
+    }
+  });
 
-  wordClicked(idx: number){
-    if(this.actualWord.en.value === this.possibleWords[idx].en.value){
-      if(!this.wasFailed){
-        this.success++;
+  readonly actualIdx = signal(0);
+  readonly success = signal(0);
+  readonly failed = signal(0);
+  readonly wasFailed = signal(false);
+  readonly feedbackState = signal<{ clickedIndex: number; isCorrect: boolean } | null>(null);
+
+  readonly currentWord = computed(() => this.cards()[this.actualIdx()]);
+  readonly isGameOver = computed(() => this.actualIdx() >= this.cards().length && this.cards().length > 0);
+
+  readonly currentOptions = computed(() => {
+    const target = this.currentWord();
+    const allCards = this.cards();
+
+    if (!target || allCards.length === 0) return [];
+
+    const others = allCards.filter(c => c !== target);
+    this.wordService.shuffle(others);
+
+    const options = [...others.slice(0, 3), target];
+    this.wordService.shuffle(options);
+
+    return options;
+  });
+
+
+ handleWordClick(optionIdx: number, selectedWord: LearnWordData) {
+    if (this.feedbackState()?.isCorrect) return;
+
+    const target = this.currentWord();
+    if (!target) return;
+
+    const isMatch = selectedWord.en === target.en;
+
+    this.feedbackState.set({ clickedIndex: optionIdx, isCorrect: isMatch });
+
+    if (isMatch) {
+      if (!this.wasFailed()) {
+        this.success.update(s => s + 1);
       }
-      this.possibleWords[idx][this.answerLang].activeClass = 'bg-success';
-      timer(200).subscribe(() => {
-        this.actualIdx++;
-        this.next(this.actualIdx);
-        this.cdr.markForCheck();
-      });
+   setTimeout(() => {
+        this.nextWord();
+      }, 500);
     } else {
-      if(!this.wasFailed){
-        this.failed++;
-        this.wasFailed = true;
+      if (!this.wasFailed()) {
+        this.failed.update(f => f + 1);
+        this.wasFailed.set(true);
       }
-      this.possibleWords[idx][this.answerLang].activeClass = 'bg-danger';
+
+      setTimeout(() => {
+        if (this.feedbackState()?.clickedIndex === optionIdx && !this.feedbackState()?.isCorrect) {
+           this.feedbackState.set(null);
+        }
+      }, 1000);
     }
   }
 
-  private next(idx: number = 0){
-    this.wasFailed = false;
-    for(let w of this.possibleWords){
-      w[this.answerLang].activeClass = 'bg-dark';
-    }
-    if(idx === this.cards.length){
-      return;
-    }
-    this.actualWord = this.cards[idx];
-    this.possibleWords = this.getRandomWordsExcept(this.cards);
-    this.possibleWords.push(this.actualWord);
-    this.wordService.shuffle(this.possibleWords);
+  private nextWord() {
+    this.feedbackState.set(null);
+    this.wasFailed.set(false);
+    this.actualIdx.update(i => i + 1);
   }
 
-  restart(){
-    this.wordService.shuffle(this.cards);
-    this.actualIdx = 0;
-    this.success = 0;
-    this.failed = 0;
-    this.next(this.actualIdx);
+  restart() {
+    this.cards.update(current => {
+      const reshuffled = [...current];
+      this.wordService.shuffle(reshuffled);
+      return reshuffled;
+    });
+
+    this.actualIdx.set(0);
+    this.success.set(0);
+    this.failed.set(0);
+    this.wasFailed.set(false);
+    this.feedbackState.set(null);
   }
 
-  speak(){
-    this.wordService.speakPhrase(this.actualWord.en.value);
-  }
-
-  toggleLang(){
-     this.wasFailed = false;
-    for(let w of this.possibleWords){
-      w[this.answerLang].activeClass = 'bg-dark';
-    }
-    if(this.questionLang === 'en'){
-      this.questionLang = 'hu';
-      this.answerLang = 'en';
-    } else {
-      this.questionLang = 'en';
-      this.answerLang = 'hu';
-    }
+  toggleLang() {
+    this.questionLang.update(l => l === 'en' ? 'hu' : 'en');
     this.restart();
   }
 
-  //TODO itt masik model kell, mert kell a magyar es az angol is
+  speak() {
+    const word = this.currentWord();
+    if (word) {
+      this.wordService.speakPhrase(word.en);
+    }
+  }
+
+  getCardConfig(optionWord: LearnWordData, idx: number) {
+    const feedback = this.feedbackState();
+    let activeClass = 'bg-dark';
+
+    if (feedback && feedback.clickedIndex === idx) {
+      activeClass = feedback.isCorrect ? 'bg-success' : 'bg-danger';
+    }
+
+    return {
+      value: optionWord[this.answerLang()],
+      visible: true,
+      speakable: false,
+      activeClass: activeClass
+    };
+  }
 }

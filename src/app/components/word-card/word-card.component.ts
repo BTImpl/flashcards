@@ -7,10 +7,11 @@ import { NgClass } from '@angular/common';
     selector: 'app-word-card',
     templateUrl: './word-card.component.html',
     styleUrls: ['./word-card.component.css'],
-    imports: [NgClass]
+    imports: [NgClass],
+    standalone: true
 })
 export class WordCardComponent {
-  @Input() word?: WordCardModel;
+  @Input({required: true}) word!: WordCardModel;
   @Output() cardClicked = new EventEmitter<void>();
 
    private wordService = inject(WordService);

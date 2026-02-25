@@ -1,61 +1,63 @@
 <div class="container-div">
+
   <div class="d-flex mt-2 bg-success m-1">
     <div class="col-2">
-      <button class="btn btn-success" (click)="speak()" (keydown.enter)="speak()" [class.invisible]="questionLang === 'hu'" aria-label="Speak word">
+      <button
+        class="btn btn-success"
+        (click)="speak()"
+        [class.invisible]="questionLang() === 'hu'"
+        aria-label="Speak word">
         <i class="fa fa-volume-up" aria-hidden="true"></i>
       </button>
     </div>
+
     <div class="col-8 text-white text-center">
-      <h1 id="actualHu">{{ actualWord[questionLang].value }}</h1>
+      @if (currentWord(); as word) {
+        <h1 id="actualHu">{{ word[questionLang()] }}</h1>
+      }
     </div>
+
     <div class="col-2">
-      @if(questionLang === 'en') {
-        <button class="btn btn-success" (click)="toggleLang()" (keydown.enter)="toggleLang()" aria-label="Switch to Hungarian">
-          <img src="../../../assets/images/hu.png" alt="">
-        </button>
-      }
-      @if(questionLang === 'hu') {
-        <button class="btn btn-success" (click)="toggleLang()" (keydown.enter)="toggleLang()" aria-label="Switch to English">
-          <img src="../../../assets/images/en.png" alt="">
-        </button>
-      }
+      <button class="btn btn-success" (click)="toggleLang()" aria-label="Switch Language">
+        <img [src]="questionLang() === 'en' ? '../../../assets/images/hu.png' : '../../../assets/images/en.png'" alt="Language flag">
+      </button>
     </div>
   </div>
-  @if (actualIdx < cards.length) {
+
+  @if (!isGameOver()) {
     <div class="answers">
-      @for (w of possibleWords; track $index) {
+      @for (option of currentOptions(); track $index) {
         <app-word-card
-          (cardClicked)="wordClicked($index)"
-          [word]="w[answerLang]"
-          [class.bg-danger]=""
-        >
+          (cardClicked)="handleWordClick($index, option)"
+          [word]="getCardConfig(option, $index)">
         </app-word-card>
       }
     </div>
-  }
-  @if (actualIdx == cards.length) {
-
+  } @else {
     <div class="restart">
-<button class="btn btn-primary" (click)="restart()">
-  <h3>{{'button.restart' | translate}}</h3>
-</button>
+      <button class="btn btn-primary" (click)="restart()">
+        <h3>{{ 'button.restart' | translate }}</h3>
+      </button>
     </div>
   }
+
   <footer class="p-1">
     <div class="row">
       <div class="col-6">
         <h3>
-        <i class="fa fa-check text-success" aria-hidden="true"></i>
-        : {{ success }}  |
-        <i class="fa fa-times text-danger" aria-hidden="true"></i>
-        : {{ failed }}
+          <i class="fa fa-check text-success" aria-hidden="true"></i>
+          : {{ success() }} |
+          <i class="fa fa-times text-danger" aria-hidden="true"></i>
+          : {{ failed() }}
         </h3>
       </div>
-      @if (actualIdx < cards.length) {
+
+      @if (!isGameOver()) {
         <div class="col-6 text-end">
-          <h3>{{ actualIdx + 1 }} / {{ cards.length }}</h3>
+          <h3>{{ actualIdx() + 1 }} / {{ cards().length }}</h3>
         </div>
       }
     </div>
   </footer>
+
 </div>

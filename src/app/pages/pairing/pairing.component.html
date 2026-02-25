@@ -1,16 +1,27 @@
-<div class="container-div" >
+<div class="container-div">
+  <div class="row" style="height: 100%;" *ngFor="let card of enCards(); let i = index">
 
+    <app-word-card
+      class="col-6"
+      [word]="card"
+      (cardClicked)="wordClicked('en', i)">
+    </app-word-card>
 
-    <div class="row " style="height: 100%;" *ngFor="let w of actualWords; let i = index">
-      <app-word-card class="col-6 pairing-word-left" (cardClicked)="wordClicked('en', i)" [word]="w.en">
-      </app-word-card>
-      <app-word-card class="col-6 pairing-word-right" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
-      </app-word-card>
-    </div>
+    <app-word-card
+      class="col-6"
+      [word]="huCards()[i]"
+      (cardClicked)="wordClicked('hu', i)">
+    </app-word-card>
 
+  </div>
 
-    <app-naigation-footer (backClicked)="prev()" (nextClicked)="next()" [backDisabled]="actualStartIndex <= 0" [nextDisabled]="actualStartIndex + displayedWordsCount >= lenth">
-      <h3 class="col-12" style="display: inline;" id="actualWord">{{actualStartIndex +1}}-{{actualStartIndex+displayedWordsCount}}/{{lenth}}</h3>
-    </app-naigation-footer>
-
+  <app-navigation-footer
+    (backClicked)="prev()"
+    (nextClicked)="next()"
+    [backDisabled]="actualStartIndex() <= 0"
+    [nextDisabled]="actualStartIndex() + displayedWordsCount >= totalLength()">
+    <h3 class="col-12" style="display: inline;">
+      {{ actualStartIndex() + 1 }}-{{ actualStartIndex() + enCards().length }} / {{ totalLength() }}
+    </h3>
+  </app-navigation-footer>
 </div>

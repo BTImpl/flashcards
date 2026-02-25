@@ -1,115 +1,116 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Word } from 'src/app/model/words.model';
+import { Component, computed, inject, signal, linkedSignal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { WordStore } from 'src/app/services/word.store';
 import { WordService } from 'src/app/services/words.service';
-import { PairingForm, PairingWord } from './pairing.model';
-import { NgFor } from '@angular/common';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
-import { NaigationFooterComponent } from "src/app/naigation-footer/naigation-footer.component";
+import { NavigationFooterComponent } from "src/app/navigation-footer/navigation-footer.component";
+import { WordCardModel } from 'src/app/components/word-card/word-card.model';
+import { Word } from 'src/app/model/words.model';
 
 @Component({
-    selector: 'app-pairing',
-    templateUrl: './pairing.component.html',
-    styleUrls: ['./pairing.component.css'],
-    imports: [NgFor, WordCardComponent, NaigationFooterComponent]
+  selector: 'app-pairing',
+  standalone: true,
+  imports: [CommonModule, WordCardComponent, NavigationFooterComponent],
+  templateUrl: './pairing.component.html',
+  styleUrls: ['./pairing.component.css']
 })
-export class PairingComponent implements OnInit {
-private wordService = inject(WordService);
-private words: Word[] = [];
-  displayedWordsCount: number = 4;
-  matchedWordsCount: number = 0;
-  actualStartIndex: number = 0;
-  actualWords: PairingWord[] = [];
-  shuffledWords: PairingWord[] = [];
-  selectedEn: number = -1;
-  selectedHu: number = -1;
-  lenth: number = 0;
+export class PairingComponent {
+  private wordStore = inject(WordStore);
+  private wordService = inject(WordService);
 
-  ngOnInit(): void {
-    this.words = this.wordService.getWords();
-    this.lenth = this.words.length;
-    this.wordService.shuffle(this.words);
-    this.startRound();
-  }
+  readonly displayedWordsCount = 4;
+  readonly actualStartIndex = signal(0);
+  readonly selectedEnIdx = signal<number | null>(null);
+  readonly selectedHuIdx = signal<number | null>(null);
+  readonly matchedHuValues = signal<Set<string>>(new Set());
+  readonly allWords = computed(() => this.wordStore.words());
+  readonly totalLength = computed(() => this.allWords().length);
 
-  wordClicked(lang: string, idx: number){
-    if (lang === 'en'){
-      if(this.selectedEn !== -1){
-        this.actualWords[this.selectedEn].en.activeClass = 'bg-dark';
-      }
-      this.selectedEn = idx;
-      this.actualWords[this.selectedEn].en.activeClass = 'bg-info';
+  readonly currentPageWords = computed(() => {
+    const start = this.actualStartIndex();
+    return this.allWords().slice(start, start + this.displayedWordsCount);
+  });
+
+  readonly shuffledHuWords = linkedSignal<Word[], Word[]>({
+    source: this.currentPageWords,
+    computation: (words) => {
+      const shuffled = [...words];
+      this.wordService.shuffle(shuffled);
+      return shuffled;
+    }
+  });
+
+  readonly enCards = computed<WordCardModel[]>(() =>
+    this.currentPageWords().map((w, idx) => ({
+      value: w.en,
+      visible: !this.matchedHuValues().has(w.hu),
+      activeClass: this.selectedEnIdx() === idx ? 'bg-info' : 'bg-dark',
+      speakable: true
+    }))
+  );
+
+  readonly huCards = computed<WordCardModel[]>(() =>
+    this.shuffledHuWords().map((w, idx) => ({
+      value: w.hu,
+      visible: !this.matchedHuValues().has(w.hu),
+      activeClass: this.selectedHuIdx() === idx ? 'bg-info' : 'bg-dark',
+      speakable: false
+    }))
+  );
+
+  wordClicked(lang: 'en' | 'hu', idx: number) {
+    if (lang === 'en') {
+      this.selectedEnIdx.set(idx);
     } else {
-      if(this.selectedHu !== -1){
-        this.shuffledWords[this.selectedHu].hu.activeClass = 'bg-dark';
-      }
-      this.selectedHu = idx;
-      this.shuffledWords[this.selectedHu].hu.activeClass = 'bg-info';
+      this.selectedHuIdx.set(idx);
     }
 
-    if(this.selectedEn !== -1 && this.selectedHu !== -1){
-      if(this.actualWords[this.selectedEn].hu === this.shuffledWords[this.selectedHu].hu){
-        this.matchedWordsCount++;
-        this.actualWords[this.selectedEn].en.visible = false;
-        this.shuffledWords[this.selectedHu].hu.visible = false;
-      }
-      this.actualWords[this.selectedEn].en.activeClass = 'bg-dark';
-      this.shuffledWords[this.selectedHu].hu.activeClass = 'bg-dark';
+    const enIdx = this.selectedEnIdx();
+    const huIdx = this.selectedHuIdx();
 
-      if(this.matchedWordsCount === this.displayedWordsCount){
-       this.next();
-      }
-      this.selectedEn = -1;
-      this.selectedHu = -1;
-    }
-  }
+    if (enIdx !== null && huIdx !== null) {
+      const enWord = this.currentPageWords()[enIdx];
+      const huWord = this.shuffledHuWords()[huIdx];
 
-  private startRound(){
-    this.matchedWordsCount = 0;
-  this.actualWords = [];
-  this.shuffledWords = [];
-  this.selectedEn = -1;
-  this.selectedHu = -1;
-    const words: Word[] = this.words.slice(this.actualStartIndex, this.actualStartIndex + this.displayedWordsCount);
+      if (enWord.hu === huWord.hu) {
+        this.matchedHuValues.update(prev => new Set(prev).add(enWord.hu));
 
-    for (let w of words){
-      this.actualWords.push({
-        hu: {
-          value: w.hu,
-          visible: true,
-          activeClass: 'bg-dark',
-          speakable: false
-        },
-        en: {
-          value: w.en,
-          visible: true,
-          activeClass: 'bg-dark',
-          speakable: true
+        if (this.matchedHuValues().size === this.currentPageWords().length) {
+          setTimeout(() => this.next(), 600);
         }
-      });
+      }
+
+      setTimeout(() => {
+        this.selectedEnIdx.set(null);
+        this.selectedHuIdx.set(null);
+      }, 400);
     }
-    this.shuffledWords = [...this.actualWords];
-    this.wordService.shuffle(this.shuffledWords);
   }
 
-  prev(){
-    if(this.actualStartIndex - this.displayedWordsCount <= 0){
-      this.actualStartIndex = 0;
-    } else {
-      this.actualStartIndex -= this.displayedWordsCount;
+  next() {
+    const total = this.totalLength();
+    const nextIndex = this.actualStartIndex() + this.displayedWordsCount;
+
+    if (nextIndex < total) {
+      if (nextIndex + this.displayedWordsCount > total) {
+        this.resetRound(total - this.displayedWordsCount);
+      } else {
+        this.resetRound(nextIndex);
+      }
     }
-
-  this.startRound();
-
   }
 
-  next(){
-    if(this.actualStartIndex + this.displayedWordsCount >= this.lenth -1){
-      this.actualStartIndex = this.lenth - this.displayedWordsCount ;
-    } else {
-      this.actualStartIndex += this.displayedWordsCount;
-    }
-
-  this.startRound();
+  prev() {
+    const prevIndex = Math.max(0, this.actualStartIndex() - this.displayedWordsCount);
+    this.resetRound(prevIndex);
   }
 
+  private resetRound(newIndex: number) {
+    if (this.actualStartIndex() !== newIndex) {
+      this.matchedHuValues.set(new Set());
+      this.actualStartIndex.set(newIndex);
+      this.selectedEnIdx.set(null);
+      this.selectedHuIdx.set(null);
+    }
+  }
 }

@@ -6,6 +6,28 @@
   height: 100%;
 }
 
+/* 1. Kijelöljük a kártyát, mint méret-konténert */
+app-word-card {
+  container-type: inline-size;
+  display: block !important;
+}
+
+/* 2. A szöveget a kártya szélességéhez (cqw) mérjük */
+:host ::ng-deep .card-text,
+:host ::ng-deep h3,
+:host ::ng-deep span {
+  /* 12cqw = a kártya szélességének 12%-a lesz a betűméret */
+  /* A clamp() pedig megvédi, hogy ne legyen túl kicsi vagy óriási */
+  font-size: clamp(0.6rem, 11cqw, 1.3rem) !important;
+
+  line-height: 1.1 !important;
+  text-align: center;
+  word-wrap: break-word;
+  hyphens: auto; /* Bekapcsolja a magyar elválasztást, ha kell */
+  display: block;
+  width: 100%;
+}
+
 
 .answers {
   flex: 1;

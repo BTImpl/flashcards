@@ -6,11 +6,14 @@
     "prev": "Previous",
     "check": "Check"
   },
+  "label": {
+    "loading": "Loading..."
+  },
   "home": {
     "flashcards": "Flashcards",
     "pairing": "Pairing",
-    "learnwords": "Learn Words",
-    "askWords": "Ask Words"
+    "learn-words": "Learn Words",
+    "ask-words": "Ask Words"
   },
   "KNOWN": "Known",
   "UNKNOWN": "Unknown"

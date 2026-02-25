@@ -1,8 +1,25 @@
+@if (actual()) {
 <div class="container-div">
 
-  <app-word-card [word]="actual" (cardClicked)="flip()"></app-word-card>
+  <app-word-card
+      [word]="actual()!"
+      (cardClicked)="flip()">
+  </app-word-card>
 
-    <app-naigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualWordIdx <= 0" [nextDisabled]="actualWordIdx + 1 >= words.length">
-      <h1 class="col-12" id="actualWord"> {{ actualWordIdx + 1}} / {{words.length}}</h1>
-    </app-naigation-footer>
+  <app-navigation-footer
+      (backClicked)="step(-1)"
+      (nextClicked)="step(1)"
+      [backDisabled]="actualWordIdx() <= 0"
+      [nextDisabled]="actualWordIdx() + 1 >= words.length">
+
+      <h1 class="col-12" id="actualWord">
+          {{ actualWordIdx() + 1}} / {{words.length}}
+      </h1>
+
+  </app-navigation-footer>
 </div>
+} @else {
+  <div class="loading-state">
+    <p>{{'label.loading' | translate}}</p>
+  </div>
+}

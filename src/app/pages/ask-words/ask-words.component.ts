@@ -4,20 +4,21 @@ import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NaigationFooterComponent } from "src/app/naigation-footer/naigation-footer.component";
+import { NavigationFooterComponent } from "src/app/navigation-footer/navigation-footer.component";
 
 @Component({
     selector: 'app-ask-words',
     templateUrl: './ask-words.component.html',
     styleUrls: ['./ask-words.component.css'],
-    imports: [FormsModule, TranslatePipe, NaigationFooterComponent]
+    imports: [FormsModule, TranslatePipe, NavigationFooterComponent],
+    standalone: true
 })
 export class AskWordsComponent implements OnInit {
   private wordService = inject(WordService);
   words: Word[] = [];
   actualIdx: number = 0;
   actualWord: Word = { hu: '', en: '' };
-  helpDispleyed: boolean = false
+  helpDisplayed: boolean = false
   isActualFailed: boolean = false;
   answer: string = '';
 
@@ -40,9 +41,9 @@ export class AskWordsComponent implements OnInit {
   }
 
   help(){
-    this.helpDispleyed = true;
+    this.helpDisplayed = true;
     timer(2000).subscribe(() => {
-      this.helpDispleyed = false;
+      this.helpDisplayed = false;
     });
   }
 
