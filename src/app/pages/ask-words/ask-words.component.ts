@@ -1,60 +1,67 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { timer } from 'rxjs';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NavigationFooterComponent } from "src/app/navigation-footer/navigation-footer.component";
+import { WordStore } from 'src/app/services/word.store';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-ask-words',
     templateUrl: './ask-words.component.html',
     styleUrls: ['./ask-words.component.css'],
-    imports: [FormsModule, TranslatePipe, NavigationFooterComponent],
+    imports: [CommonModule, FormsModule, TranslatePipe, NavigationFooterComponent],
     standalone: true
 })
-export class AskWordsComponent implements OnInit {
+export class AskWordsComponent {
   private wordService = inject(WordService);
-  words: Word[] = [];
-  actualIdx: number = 0;
-  actualWord: Word = { hu: '', en: '' };
-  helpDisplayed: boolean = false
-  isActualFailed: boolean = false;
-  answer: string = '';
+  private wordStore = inject(WordStore);
 
-  ngOnInit(): void {
-    this.words = this.wordService.getWords();
-    this.wordService.shuffle(this.words);
-    this.actualIdx = 0;
-    this.actualWord = this.words[this.actualIdx];
-  }
+  private allWords = this.wordStore.words;
 
-  check(){
-    if(this.answer.toLowerCase() === this.actualWord?.en.toLowerCase()){
-      this.isActualFailed = false;
-      this.step(1);
-      //TODO: ujra kell-e inditani
-    } else {
-      this.isActualFailed = true;
-    }
-    this.answer = '';
-  }
+  shuffledWords = signal<Word[]>([]);
+  actualIdx = signal(0);
 
-  help(){
-    this.helpDisplayed = true;
-    timer(2000).subscribe(() => {
-      this.helpDisplayed = false;
+  actualWord = computed(() => this.shuffledWords()[this.actualIdx()]);
+
+  helpDisplayed = signal(false);
+  isActualFailed = signal(false);
+  answer = signal('');
+
+  constructor() {
+    effect(() => {
+      const wordsToShuffle = [...this.allWords()];
+      this.wordService.shuffle(wordsToShuffle);
+      this.shuffledWords.set(wordsToShuffle);
+      this.actualIdx.set(0);
     });
   }
 
-  step(direction: number){
-    if(this.actualIdx + direction < this.words.length && this.actualIdx + direction >= 0){
-      this.actualIdx += direction;
+  check(){
+    if (this.answer().toLowerCase() === this.actualWord()?.en.toLowerCase()){
+      this.isActualFailed.set(false);
+      this.step(1);
+    } else {
+      this.isActualFailed.set(true);
     }
-    this.actualWord = this.words[this.actualIdx];
+    this.answer.set('');
   }
 
-  getStatusBar(){
-    return `${this.actualIdx + 1} / ${this.words.length}`;
+  help(){
+    this.helpDisplayed.set(true);
+    setTimeout(() => {
+      this.helpDisplayed.set(false);
+    }, 2000);
+  }
+
+  step(direction: number){
+    this.actualIdx.update(currentIdx => {
+      const newIdx = currentIdx + direction;
+      if (newIdx >= 0 && newIdx < this.shuffledWords().length) {
+        return newIdx;
+      }
+      return currentIdx;
+    });
   }
 }

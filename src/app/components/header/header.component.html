@@ -3,13 +3,18 @@
     <div class="col-6">
       <button class="col-12 btn btn-secondary" (click)="changeUser()">
         <span class="fa fa-user"></span>
-        <span id="sheet">{{model.user}}</span>
+        <span id="sheet">{{ wordStore.selectedSheet() }}</span>
       </button>
     </div>
     <div class="col-6">
       <button class="col-12 btn btn-success" (click)="changeList()" >
-        <span id="deckButtonIcon" class="fa fa-exclamation" aria-hidden="true"></span>
-        <span id="deckButtonText">{{model.list}}</span>
+        <span
+          id="deckButtonIcon"
+          aria-hidden="true"
+          class="fa"
+          [ngClass]="currentListConfig().iconClass"
+        ></span>
+        <span id="deckButtonText">{{ currentListConfig().labelKey | translate }}</span>
       </button>
     </div>
   </div>

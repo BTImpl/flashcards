@@ -1,36 +1,38 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HeaderModel, KnownUnknownEnum, UsersEnum } from 'src/app/model/header.model';
+import { ListTypeEnum, LIST_TYPES, UsersEnum } from 'src/app/model/header.model';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WordStore } from 'src/app/services/word.store';
+import { NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-header',
     standalone: true,
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
-    imports: [TranslatePipe]
+    imports: [TranslatePipe, NgClass]
 })
 export class HeaderComponent {
   private router = inject(Router);
-  private wordStore = inject(WordStore);
+  wordStore = inject(WordStore);
 
-  model: HeaderModel = {
-    user: UsersEnum.GABI,
-    list: KnownUnknownEnum.KNOWN
-  };
+  readonly UsersEnum = UsersEnum;
+
+  readonly currentListConfig = computed(() => LIST_TYPES[this.wordStore.selectedListType()]);
 
   toHome(){
     this.router.navigate(['/']);
   }
 
   changeList(){
-    this.model.list = this.model.list === KnownUnknownEnum.KNOWN ? KnownUnknownEnum.UNKNOWN : KnownUnknownEnum.KNOWN;
+    this.wordStore.selectedListType.update(current =>
+      current === ListTypeEnum.KNOWN ? ListTypeEnum.UNKNOWN : ListTypeEnum.KNOWN
+    );
   }
 
   changeUser(){
-    this.model.user = this.model.user === UsersEnum.GABI ? UsersEnum.TOMI : UsersEnum.GABI;
-    console.log(`user changed: ${this.model.user}`);
-    this.wordStore.selectedSheet.set(this.model.user);
+    this.wordStore.selectedSheet.update(current =>
+      current === UsersEnum.GABI ? UsersEnum.TOMI : UsersEnum.GABI
+    );
   }
 }

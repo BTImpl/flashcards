@@ -1,39 +1,57 @@
-<div class="container-div">
-  <div class="content">
+@if(actualWord(); as word) {
+  <div class="container-div">
+    <div class="content">
 
-    <div class="row">
-      <div class="card bg-success text-white text-center">
-        <h1>{{ actualWord.hu }}</h1>
-      </div>
-    </div>
-
-
-    <div class="row">
-      <div class="input-group p-0">
-        <input type="text" [(ngModel)]="answer" class="form-control" [class.is-invalid]="isActualFailed" />
-
-        <div class="input-group-append">
-          <button class="btn btn-info" (click)="help()">
-            <i class="fa fa-question" aria-hidden="true"></i>
-          </button>
+      <div class="row">
+        <div class="card bg-success text-white text-center">
+          <h1>{{ word.hu }}</h1>
         </div>
       </div>
+
+      <form (ngSubmit)="check()">
+        <div class="row">
+          <div class="input-group p-0">
+            <input
+              type="text"
+              class="form-control"
+              [ngModel]="answer()"
+              (ngModelChange)="answer.set($event)"
+              [class.is-invalid]="isActualFailed()"
+              name="answer"
+              autocomplete="off"
+            />
+
+            <div class="input-group-append">
+              <button type="button" class="btn btn-info" (click)="help()" aria-label="Help">
+                <i class="fa fa-question" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <h1 [class.invisible]="!helpDisplayed()">{{ word.en }}</h1>
+        </div>
+        <div class="row">
+          <button type="submit" class="col-12 btn btn-dark p-3">
+            <i class="fa fa-square-check" aria-hidden="true"></i>
+            <span>{{'button.check' | translate}}</span>
+          </button>
+        </div>
+      </form>
     </div>
 
-    <div class="row">
-      <h1 [class.invisible]="!helpDisplayed">{{ actualWord.en }}</h1>
-    </div>
-    <div class="row">
-      <button class="col-12 btn btn-dark p-3" (click)="check()">
-        <i class="fa fa-square-check" aria-hidden="true"></i>
-        <span>{{'button.check' | translate}}</span>
-      </button>
-    </div>
+    <app-navigation-footer
+      (backClicked)="step(-1)"
+      (nextClicked)="step(1)"
+      [backDisabled]="actualIdx() <= 0"
+      [nextDisabled]="actualIdx() + 1 >= shuffledWords().length">
+      <h3 class="col-12">{{ actualIdx() + 1 }} / {{ shuffledWords().length }}</h3>
+    </app-navigation-footer>
+
   </div>
-
-  <app-navigation-footer (backClicked)="step(-1)" (nextClicked)="step(1)" [backDisabled]="actualIdx <= 0"
-    [nextDisabled]="actualIdx +1 >= words.length">
-    <h3 class="col-12">{{ getStatusBar() }}</h3>
-  </app-navigation-footer>
-
-</div>
+} @else {
+  <div class="loading-state">
+    <p>{{'label.loading' | translate}}</p>
+  </div>
+}
