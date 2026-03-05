@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WordService } from 'src/app/services/words.service';
@@ -35,10 +35,12 @@ export class LearnWordsComponent {
   constructor() {
     effect(() => {
       const sourceWords = this.wordStore.words();
-      const mapped = sourceWords.map((w) => ({ hu: w.hu, en: w.en }));
-      this.wordService.shuffle(mapped);
-      this.cards.set(mapped);
-      this.restart();
+      untracked(() => {
+        const mapped = sourceWords.map((w) => ({ hu: w.hu, en: w.en }));
+        this.wordService.shuffle(mapped);
+        this.cards.set(mapped);
+        this.restart();
+      });
     });
   }
 

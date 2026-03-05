@@ -42,8 +42,8 @@
   }
 
   <footer class="p-1">
-    <div class="row">
-      <div class="col-6">
+    <div class="d-flex justify-content-between">
+      <div>
         <h3>
           <i class="fa fa-check text-success" aria-hidden="true"></i>
           : {{ success() }} |
@@ -53,7 +53,7 @@
       </div>
 
       @if (!isGameOver()) {
-        <div class="col-6 text-end">
+        <div>
           <h3>{{ actualIdx() + 1 }} / {{ cards().length }}</h3>
         </div>
       }
