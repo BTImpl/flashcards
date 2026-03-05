@@ -13,7 +13,7 @@
 
     <div class="col-8 text-white text-center">
       @if (currentWord(); as word) {
-        <h1 id="actualHu">{{ word[questionLang()] }}</h1>
+        <h1 id="actualHu" [style.font-size]="getFontSizeTop(word[questionLang()])">{{ word[questionLang()] }}</h1>
       }
     </div>
 
@@ -29,7 +29,8 @@
       @for (option of currentOptions(); track $index) {
         <app-word-card
           (cardClicked)="handleWordClick($index, option)"
-          [word]="getCardConfig(option, $index)">
+          [word]="getCardConfig(option, $index)"
+          [style.font-size]="getFontSize(option[answerLang()])">
         </app-word-card>
       }
     </div>
@@ -44,17 +45,17 @@
   <footer class="p-1">
     <div class="d-flex justify-content-between">
       <div>
-        <h3>
+        <h2>
           <i class="fa fa-check text-success" aria-hidden="true"></i>
           : {{ success() }} |
           <i class="fa fa-times text-danger" aria-hidden="true"></i>
           : {{ failed() }}
-        </h3>
+        </h2>
       </div>
 
       @if (!isGameOver()) {
         <div>
-          <h3>{{ actualIdx() + 1 }} / {{ cards().length }}</h3>
+          <h2>{{ actualIdx() + 1 }} / {{ cards().length }}</h2>
         </div>
       }
     </div>

@@ -22,4 +22,5 @@ button.bg-info {
   border: none;
   border-radius: 5px;
   padding: 10px;
+  font-size: inherit;
 }

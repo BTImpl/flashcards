@@ -142,4 +142,18 @@ export class LearnWordsComponent {
       activeClass: activeClass,
     };
   }
+
+  getFontSize(word: string): string {
+    if (word.length > 18) return '1rem';
+    if (word.length > 12) return '1.25rem';
+    if (word.length > 8) return '1.5rem';
+    if (word.length > 6) return '2rem';
+    return '2.5rem';
+  }
+
+  getFontSizeTop(word: string): string {
+    if (word.length > 20) return '1rem';
+    if (word.length > 12) return '1.25rem';
+    return '1.5rem';
+  }
 }
